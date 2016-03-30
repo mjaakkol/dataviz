@@ -101,7 +101,7 @@ function draw(data) {
   var nested_mean = d3.nest()
                 .key(function(d) {
                   var date = d['LoanOriginationDate'];
-                  return new Date(date.getFullYear(),Math.floor(date.getMonth()/3)*3);
+                  return new Date(date.getUTCFullYear(),Math.floor(date.getMonth()/3)*3,1);
                 })
                 .rollup(function(d){
                   return d3.mean(d,function(d){
@@ -112,8 +112,8 @@ function draw(data) {
 
   var quarters = []
   
-  var quarters_min = d3.extent(nested_mean, function(d) { return d["key"]; });
-  //var quarters_min = d3.extent(nested_mean);
+  var quarters_min = d3.min(nested_mean, function(d) { return new Date(d["key"]); });
+  var quarters_max = d3.max(nested_mean, function(d) { return new Date(d["key"]); });
   
   // Ending plotting scales and making converters
   // from here we start plotting dots and making graphs
