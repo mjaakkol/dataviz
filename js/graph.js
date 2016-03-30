@@ -1,5 +1,20 @@
 
+function key_func(d){
+    return d['key'];
+}
 
+function get_quarters(nested_q){
+    var quarters = [],
+        i = 0;
+
+    for(; i < nested_q.length ; ++i){
+        quarters.push(new Date(nested_q[i].key));
+    }
+    debugger;
+    return quarters.sort(function(a,b){
+        return b-a;
+    });
+}
 
 
 function draw(data) {
@@ -110,10 +125,7 @@ function draw(data) {
                 })
                 .entries(data);
 
-  var quarters = []
-  
-  var quarters_min = d3.min(nested_mean, function(d) { return new Date(d["key"]); });
-  var quarters_max = d3.max(nested_mean, function(d) { return new Date(d["key"]); });
+  var quarters = get_quarters(nested);
   
   // Ending plotting scales and making converters
   // from here we start plotting dots and making graphs
