@@ -180,18 +180,23 @@ function draw(data) {
     d3.select("h2")
         .text("Average Borrow's rate up to quarter starting at " + q);
 
-    var lines = d3.svg.line()
+    var line = d3.svg.line()
                 .x(x_coord)
                 .y(y_coord);
-                
+        
+    svg.selectAll("path")
+      .data(filtered,key_func)
+      .exit()
+      .remove();
+      
     var line_stroke = "gray",
-        stroke_width = 0.5;
+        stroke_width = 0.2;
 
     if (highlighted == true){
         var circles = svg.selectAll('circles')
                          .data(filtered,key_func);
                          
-        circles.remove();
+        circles.exit().remove();
 
         circles.enter()
           .append("circle")
@@ -204,7 +209,9 @@ function draw(data) {
         line_stroke = "black";
         stroke_width = 2;
     }
-    
+ //   var lines = svg.selectAll("path")
+ //                  .data(filtered,key_func);
+     
     d3.select("svg")
       .append("g")
       .append("path")
@@ -213,10 +220,12 @@ function draw(data) {
       .attr("class","line")
       .attr("class","point-clips")
       .attr("class","point-paths")
-      .attr("d",lines(filtered))
-      .attr("stroke-width",line_stroke)
-      .attr("stroke",line_stroke)
+      .attr("d",line(filtered))
+      .style("stroke-width",stroke_width)
+      .style("stroke",line_stroke)
       .style("fill", "none");
+//      .append("svg:title")
+//      .text("muu");
   }
 
   function scatter_plot(data){
@@ -267,6 +276,10 @@ function draw(data) {
         }
         else {
             clearInterval(interval);
+            
+            // this is where we start context sensitivy and interactivity
+
+            
         }
       }
     },timeout);
