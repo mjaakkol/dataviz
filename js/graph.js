@@ -10,16 +10,30 @@ function get_quarters(nested_q){
     for(; i < nested_q.length ; ++i){
         quarters.push(new Date(nested_q[i].key));
     }
-    debugger;
+
     return quarters.sort(function(a,b){
-        return b-a;
+        // I want this to be ascending
+        return a-b;
     });
 }
 
+function draw_axis(x_axis,y_axis,height,margin){
+  d3.select("svg")
+    .append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(x_axis);
+
+  d3.select("svg")
+    .append("g")
+    .attr("class", "y axis")
+    .attr("transform", "translate(" + margin + ",0)")
+    .call(y_axis);    
+}
 
 function draw(data) {
   "use strict";
-  var margin = 50,
+  var margin = 75,
       width = 1600 - margin,
       height = 1000 - margin;
 
@@ -50,7 +64,7 @@ function draw(data) {
 
   // Scaling the outliers out of the graph helping with the readability
   // Still want to keep those values in dataset for the calculations
-  interest_extent[1] = 0.38;
+  //interest_extent[1] = 0.38;
   
   var creditscore_extent = d3.extent(data, function(d){
     return d['CreditScoreRangeLower'];
@@ -81,7 +95,7 @@ function draw(data) {
     .scale(interest_scale)
     .tickFormat(d3.format("%"))
     .orient("left");
-
+/*
   d3.select("svg")
     .append("g")
     .attr("class", "x axis")
@@ -93,6 +107,8 @@ function draw(data) {
     .attr("class", "y axis")
     .attr("transform", "translate(" + margin + ",0)")
     .call(interest_axis);
+*/
+    draw_axis(time_axis,interest_axis,height,margin);
 
   /* This makes two layered structure where outer ring is dates in quarters
     so that the date matches the first date of the quarter.
@@ -104,7 +120,7 @@ function draw(data) {
                   return new Date(date.getFullYear(),Math.floor(date.getMonth()/3)*3);
                 })
                 .key(function(d) {
-                  return d['CreditScoreRangeLower']
+                  return d['CreditScoreRangeLower'];
                 })
                 .rollup(function(d){
                   return d3.mean(d,function(d){
@@ -112,7 +128,22 @@ function draw(data) {
                   });
                 })
                 .entries(data);
-                
+
+  var nested_cscore = d3.nest()
+                .key(function(d) {
+                    return d['CreditScoreRangeLower'];                
+                })
+                .key(function(d) {
+                  var date = d['LoanOriginationDate'];
+                  return new Date(date.getFullYear(),Math.floor(date.getMonth()/3)*3);
+                })
+                .rollup(function(d){
+                  return d3.mean(d,function(d){
+                    return d['BorrowerRate'];
+                  });
+                })
+                .entries(data);
+
   var nested_mean = d3.nest()
                 .key(function(d) {
                   var date = d['LoanOriginationDate'];
@@ -129,22 +160,63 @@ function draw(data) {
   
   // Ending plotting scales and making converters
   // from here we start plotting dots and making graphs
-  debugger;
-  function plot_points(data,plot_type){
-    d3.selectAll("circle")
-      .attr("cx", function(d) {
-          return time_scale(d["LoanOriginationDate"]);
-      })
-      .attr("cy", function(d) {
-          return interest_scale(d["BorrowerRate"]);
-      })
-      .attr("r", 1.5)
+
+  function update(q,nested_data,highlighted = true){
+    var filtered = nested_data.filter(function(d) {
+        return (new Date(d['key']) <= q);
+    })
+    .sort(function(a,b){
+        return (new Date(a['key'])) - (new Date(b['key']));
+    });
+
+    function x_coord(d){
+        return time_scale(new Date(d.key));
+    }
+    
+    function y_coord(d){
+        return interest_scale(d.values);
+    }
+
+    d3.select("h2")
+        .text("Average Borrow's rate up to quarter starting at " + q);
+
+    var lines = d3.svg.line()
+                .x(x_coord)
+                .y(y_coord);
+                
+    var line_stroke = "gray",
+        stroke_width = 0.5;
+
+    if (highlighted == true){
+        var circles = svg.selectAll('circles')
+                         .data(filtered,key_func);
+                         
+        circles.remove();
+
+        circles.enter()
+          .append("circle")
+          .transition()
+          .duration(100)
+          .attr("cx", x_coord)
+          .attr("cy", y_coord)
+          .style("fill-opacity",1.0);
+          
+        line_stroke = "black";
+        stroke_width = 2;
+    }
+    
+    d3.select("svg")
+      .append("g")
+      .append("path")
       .transition()
-      .duration(1000)
-      .style("fill-opacity",0.7)
-      .style("fill", function(d){
-        return heatmapColor(d['CreditScoreRangeLower']);
-      });
+      .duration(100)
+      .attr("class","line")
+      .attr("class","point-clips")
+      .attr("class","point-paths")
+      .attr("d",lines(filtered))
+      .attr("stroke-width",line_stroke)
+      .attr("stroke",line_stroke)
+      .style("fill", "none");
   }
 
   function scatter_plot(data){
@@ -157,7 +229,7 @@ function draw(data) {
       })
       .attr("r", 1.5)
       .transition()
-      .duration(1000)
+      .duration(100)
       .style("fill-opacity",0.7)
       .style("fill", function(d){
         return heatmapColor(d['CreditScoreRangeLower']);
@@ -165,31 +237,43 @@ function draw(data) {
       
       var clear_timeout = setTimeout(function() {
         var existing_circles = d3.selectAll("circle").remove();
-      }, 10000);
+      }, 5000);
   }
   
-  function line_chart(data){
-    
+  function update_credit_scores(idx,creditscore_data){
+    for (var key in creditscore_data){
+        update(idx,creditscore_data[key].values,false);
+    }
   }
   
-  function interval_plotting(pfunc,inner_length,outter_length,timeout){
+  function interval_plotting(timeout){
     var quarter_idx = 0,
-        credit_score_idx = 0;
+        function_idx = 0;
+    var functions = [update,update_credit_scores],
+        pfunc = functions[0],
+        used_data = [nested_mean,nested_cscore];
+
     // Timer for plotting first in time and then in through credit scores
     var interval = setInterval(function(){
-      if(quarter_idx < outter_length){
-        if(credit_score_idx < inner_length){
-          pfunc(quarter_idx,credit_score_idx)          
-        }
+      if(quarter_idx < quarters.length){
+          pfunc(quarters[quarter_idx],used_data[function_idx]);
+          quarter_idx++;
       }
       else {
-        clearInterval(interval);
+        function_idx++;
+        if (function_idx < functions.length){
+            pfunc = functions[function_idx];
+            quarter_idx = 0;
+        }
+        else {
+            clearInterval(interval);
+        }
       }
     },timeout);
   }
   
-  //scatter_plot(data);
-  interval_plotting()
+//  scatter_plot(data);
+  interval_plotting(100);
 };
 
 var format = d3.time.format("%m/%d/%Y %H:%M")
