@@ -191,6 +191,11 @@ function draw(data) {
       
     var line_stroke = "gray",
         stroke_width = 0.2;
+        
+    var tooltip = d3.select("body").append("div")
+        .attr("class","tooltip")
+        .style("opacity",1)
+        .text("juhuu");
 
     if (highlighted == true){
         var circles = svg.selectAll('circles')
@@ -200,21 +205,44 @@ function draw(data) {
 
         circles.enter()
           .append("circle")
+          .on("mouseover", function(){
+              debugger;
+              return tooltip.style("visibility", "visible");})
           .transition()
           .duration(100)
           .attr("cx", x_coord)
           .attr("cy", y_coord)
           .style("fill-opacity",1.0);
-          
+
+/*
+          .on("mouseover", function(d){
+              div.transition()
+                .duration(200)
+                .style("opacity",.9);
+              div.html("cat")
+                .style("left",(d3.event.pageX) + "px")
+                .style("top",(d3.event.pageY - 28) + "px");
+          })
+          .on("mouseout",function(d){
+              div.transition()
+                .duration(500)
+                .style("opacity",0);
+          })          
+*/          
         line_stroke = "black";
         stroke_width = 2;
     }
  //   var lines = svg.selectAll("path")
  //                  .data(filtered,key_func);
+    // This is for tool tips
+
      
     d3.select("svg")
       .append("g")
       .append("path")
+      .on("mouseover", function(){
+          debugger;
+          return tooltip.style("visibility", "visible");})
       .transition()
       .duration(100)
       .attr("class","line")
@@ -223,7 +251,8 @@ function draw(data) {
       .attr("d",line(filtered))
       .style("stroke-width",stroke_width)
       .style("stroke",line_stroke)
-      .style("fill", "none");
+      .style("fill", "none")
+
 //      .append("svg:title")
 //      .text("muu");
   }
