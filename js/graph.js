@@ -190,11 +190,12 @@ function draw(data) {
       .remove();
       
     var line_stroke = "gray",
-        stroke_width = 0.2;
+        stroke_width = 2;
         
     var tooltip = d3.select("body").append("div")
         .attr("class","tooltip")
         .style("opacity",1)
+        .style("visibility", "hidden")
         .text("juhuu");
 
     if (highlighted == true){
@@ -230,19 +231,24 @@ function draw(data) {
           })          
 */          
         line_stroke = "black";
-        stroke_width = 2;
+        stroke_width = 3;
     }
- //   var lines = svg.selectAll("path")
- //                  .data(filtered,key_func);
-    // This is for tool tips
 
-     
-    d3.select("svg")
+    var lines = d3.select("svg")
       .append("g")
       .append("path")
+     
+    lines
       .on("mouseover", function(){
-          debugger;
-          return tooltip.style("visibility", "visible");})
+          lines.style("stroke","black")
+               .style("opacity",.9);
+          return tooltip.style("visibility", "visible")
+          .style("left",(d3.event.pageX) + "px")
+                .style("top",(d3.event.pageY - 28) + "px");})
+      .on("mouseout", function(){
+          lines.style("stroke","gray")
+               .style("opacity",.0);
+          return tooltip.transition().duration(500).style("visibility", "hidden");})
       .transition()
       .duration(100)
       .attr("class","line")
@@ -305,6 +311,7 @@ function draw(data) {
         }
         else {
             clearInterval(interval);
+            
             
             // this is where we start context sensitivy and interactivity
 
