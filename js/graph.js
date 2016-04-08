@@ -95,19 +95,7 @@ function draw(data) {
     .scale(interest_scale)
     .tickFormat(d3.format("%"))
     .orient("left");
-/*
-  d3.select("svg")
-    .append("g")
-    .attr("class", "x axis")
-    .attr("transform", "translate(0," + height + ")")
-    .call(time_axis);
 
-  d3.select("svg")
-    .append("g")
-    .attr("class", "y axis")
-    .attr("transform", "translate(" + margin + ",0)")
-    .call(interest_axis);
-*/
     draw_axis(time_axis,interest_axis,height,margin);
 
   /* This makes two layered structure where outer ring is dates in quarters
@@ -161,7 +149,7 @@ function draw(data) {
   // Ending plotting scales and making converters
   // from here we start plotting dots and making graphs
 
-  function update(q,nested_data,highlighted = true){
+  function update(q,nested_data,highlighted = true, toolt = ""){
     var filtered = nested_data.filter(function(d) {
         return (new Date(d['key']) <= q);
     })
@@ -196,7 +184,7 @@ function draw(data) {
         .attr("class","tooltip")
         .style("opacity",1)
         .style("visibility", "hidden")
-        .text("juhuu");
+        .text(toolt);
 
     if (highlighted == true){
         var circles = svg.selectAll('circles')
@@ -236,15 +224,23 @@ function draw(data) {
 
     var lines = d3.select("svg")
       .append("g")
-      .append("path")
+      .append("path");
+      
+    function bring_text_up(){
+        lines.style("stroke","black")
+             .style("opacity",.9);
+        return tooltip.style("visibility", "visible")
+                      .style("left",(d3.event.pageX) + "px")
+                      .style("top",(d3.event.pageY - 28) + "px");
+    }    
      
     lines
       .on("mouseover", function(){
-          lines.style("stroke","black")
-               .style("opacity",.9);
-          return tooltip.style("visibility", "visible")
-          .style("left",(d3.event.pageX) + "px")
-                .style("top",(d3.event.pageY - 28) + "px");})
+        bring_text_up();
+      })
+/*      .on("mousemove", function(){
+        bring_text_up();
+      })*/
       .on("mouseout", function(){
           lines.style("stroke","gray")
                .style("opacity",.0);
@@ -257,7 +253,7 @@ function draw(data) {
       .attr("d",line(filtered))
       .style("stroke-width",stroke_width)
       .style("stroke",line_stroke)
-      .style("fill", "none")
+      .style("fill", "none");
 
 //      .append("svg:title")
 //      .text("muu");
@@ -284,9 +280,19 @@ function draw(data) {
       }, 5000);
   }
   
+  function calculate_credit_score(score){
+    if (score == 0){
+      return "0-299"
+    }
+    else {
+      return score + "-" + +score+19;
+    }
+  }
+  
   function update_credit_scores(idx,creditscore_data){
     for (var key in creditscore_data){
-        update(idx,creditscore_data[key].values,false);
+        debugger;
+        update(idx,creditscore_data[key].values,false,calculate_credit_score(creditscore_data[key].key));
     }
   }
   
@@ -311,11 +317,9 @@ function draw(data) {
         }
         else {
             clearInterval(interval);
-            
+            d3.selectAll("circle").remove();
             
             // this is where we start context sensitivy and interactivity
-
-            
         }
       }
     },timeout);
