@@ -17,17 +17,26 @@ function get_quarters(nested_q){
     });
 }
 
+function round2quarters(date){
+    return new Date(date['LoanOriginationDate'].getFullYear(),Math.floor(date['LoanOriginationDate'].getMonth()/3)*3);
+}
+
+// Function to print date in quarters
+function date2Qstring(date){
+    return "Q" + (Math.floor(date.getMonth()/3)+1) + " " + date.getFullYear();
+}
+
 function draw_axis(x_axis,y_axis,height,margin){
   d3.select("svg")
     .append("g")
     .attr("class", "x axis")
-    .attr("transform", "translate(0," + height + ")")
+    .attr("transform", "translate(-18," + (height-6) + ")")
     .call(x_axis);
 
   d3.select("svg")
     .append("g")
     .attr("class", "y axis")
-    .attr("transform", "translate(" + margin + ",0)")
+    .attr("transform", "translate(" + (margin-12) + ",0)")
     .call(y_axis);    
 }
 
@@ -81,7 +90,7 @@ function draw(data) {
     .domain(interest_extent);
 
   // Create color scale
-  var colors = ["red","yellow","green","cyan","blue"];
+  var colors = ["red","brown","yellow","green","turquoise ","blue","purple"];
   var heatmapColor = d3.scale.quantize()
     .domain(creditscore_extent)
     .range(colors);
@@ -103,10 +112,7 @@ function draw(data) {
     The inner-ring is then the lowered credit-score with the average loan rate
   */
   var nested = d3.nest()
-                .key(function(d) {
-                  var date = d['LoanOriginationDate'];
-                  return new Date(date.getFullYear(),Math.floor(date.getMonth()/3)*3);
-                })
+                .key(round2quarters)
                 .key(function(d) {
                   return d['CreditScoreRangeLower'];
                 })
@@ -121,10 +127,7 @@ function draw(data) {
                 .key(function(d) {
                     return d['CreditScoreRangeLower'];                
                 })
-                .key(function(d) {
-                  var date = d['LoanOriginationDate'];
-                  return new Date(date.getFullYear(),Math.floor(date.getMonth()/3)*3);
-                })
+                .key(round2quarters)
                 .rollup(function(d){
                   return d3.mean(d,function(d){
                     return d['BorrowerRate'];
@@ -133,10 +136,7 @@ function draw(data) {
                 .entries(data);
 
   var nested_mean = d3.nest()
-                .key(function(d) {
-                  var date = d['LoanOriginationDate'];
-                  return new Date(date.getUTCFullYear(),Math.floor(date.getMonth()/3)*3,1);
-                })
+                .key(round2quarters)
                 .rollup(function(d){
                   return d3.mean(d,function(d){
                     return d['BorrowerRate'];
@@ -149,7 +149,7 @@ function draw(data) {
   // Ending plotting scales and making converters
   // from here we start plotting dots and making graphs
 
-  function update(q,nested_data,highlighted = true, toolt = ""){
+  function update(q,nested_data,title_text,id,highlighted = true, creditscore = 1000){
     var filtered = nested_data.filter(function(d) {
         return (new Date(d['key']) <= q);
     })
@@ -166,7 +166,7 @@ function draw(data) {
     }
 
     d3.select("h2")
-        .text("Average Borrow's rate up to quarter starting at " + q);
+        .text(title_text);
 
     var line = d3.svg.line()
                 .x(x_coord)
@@ -177,20 +177,24 @@ function draw(data) {
       .exit()
       .remove();
       
-    var line_stroke = "gray",
-        stroke_width = 2;
+    var line_stroke = "black",
+        stroke_width = 3;
+        
+    if (creditscore != 1000){
+        line_stroke = heatmapColor(creditscore);
+    }
         
     var tooltip = d3.select("body").append("div")
         .attr("class","tooltip")
         .style("opacity",1)
         .style("visibility", "hidden")
-        .text(toolt);
+        .text(calculate_credit_score(creditscore));
 
     if (highlighted == true){
         var circles = svg.selectAll('circles')
                          .data(filtered,key_func);
                          
-        circles.exit().remove();
+//        circles.exit().remove();
 
         circles.enter()
           .append("circle")
@@ -198,26 +202,12 @@ function draw(data) {
               debugger;
               return tooltip.style("visibility", "visible");})
           .transition()
-          .duration(100)
+          .duration(500)
           .attr("cx", x_coord)
           .attr("cy", y_coord)
+          .attr("id",id)
           .style("fill-opacity",1.0);
 
-/*
-          .on("mouseover", function(d){
-              div.transition()
-                .duration(200)
-                .style("opacity",.9);
-              div.html("cat")
-                .style("left",(d3.event.pageX) + "px")
-                .style("top",(d3.event.pageY - 28) + "px");
-          })
-          .on("mouseout",function(d){
-              div.transition()
-                .duration(500)
-                .style("opacity",0);
-          })          
-*/          
         line_stroke = "black";
         stroke_width = 3;
     }
@@ -228,36 +218,35 @@ function draw(data) {
       
     function bring_text_up(){
         lines.style("stroke","black")
-             .style("opacity",.9);
+             .style("opacity",.9)
+             .style("stroke-width",3);
         return tooltip.style("visibility", "visible")
-                      .style("left",(d3.event.pageX) + "px")
-                      .style("top",(d3.event.pageY - 28) + "px");
+                      .style("left",(d3.event.pageX - 60) + "px")
+                      .style("top",(d3.event.pageY - 20) + "px");
     }    
      
     lines
       .on("mouseover", function(){
         bring_text_up();
       })
-/*      .on("mousemove", function(){
-        bring_text_up();
-      })*/
       .on("mouseout", function(){
-          lines.style("stroke","gray")
-               .style("opacity",.0);
+          lines.style("stroke",heatmapColor(creditscore))
+               .style("opacity",.0)
+               .style("stroke-width",stroke_width);
           return tooltip.transition().duration(500).style("visibility", "hidden");})
       .transition()
-      .duration(100)
+      .duration(500)
       .attr("class","line")
       .attr("class","point-clips")
       .attr("class","point-paths")
       .attr("d",line(filtered))
+      .attr("id",id)
       .style("stroke-width",stroke_width)
       .style("stroke",line_stroke)
       .style("fill", "none");
-
-//      .append("svg:title")
-//      .text("muu");
-  }
+      
+    return lines;
+}
 
   function scatter_plot(data){
     d3.selectAll("circle")
@@ -268,6 +257,7 @@ function draw(data) {
           return interest_scale(d["BorrowerRate"]);
       })
       .attr("r", 1.5)
+      .attr("id","scatter")
       .transition()
       .duration(100)
       .style("fill-opacity",0.7)
@@ -276,7 +266,16 @@ function draw(data) {
       });
       
       var clear_timeout = setTimeout(function() {
-        var existing_circles = d3.selectAll("circle").remove();
+          var scatter_next_button = d3.select("body")
+                                      .append("div")
+                                      .attr("class","next_button")
+                                      .text("Press to see how average rates change in a relation to credit scores");
+                                      
+          scatter_next_button.on("click", function(d){
+            d3.selectAll("circle").remove();
+            scatter_next_button.remove();
+            interval_plotting(300);
+          });
       }, 5000);
   }
   
@@ -285,48 +284,56 @@ function draw(data) {
       return "0-299"
     }
     else {
-      return score + "-" + +score+19;
+      return score + "-" + (score+19);
     }
   }
   
-  function update_credit_scores(idx,creditscore_data){
+  function update_credit_scores(idx,creditscore_data,title_text,id){
     for (var key in creditscore_data){
-        debugger;
-        update(idx,creditscore_data[key].values,false,calculate_credit_score(creditscore_data[key].key));
+        update(idx,creditscore_data[key].values,title_text,id,false,+creditscore_data[key].key);
     }
   }
   
   function interval_plotting(timeout){
     var quarter_idx = 0,
         function_idx = 0;
-    var functions = [update,update_credit_scores],
-        pfunc = functions[0],
-        used_data = [nested_mean,nested_cscore];
+
+    var dict = [{ f : update,
+                  d : nested_mean,
+                  id : "avg",
+                  t : "Average Borrower's rate up to quarter starting at "},
+                {f : update_credit_scores,
+                 d : nested_cscore,
+                 id : "score",
+                 t : "Average's Borrower's quarterly rate per credit score at "}  ];
 
     // Timer for plotting first in time and then in through credit scores
     var interval = setInterval(function(){
       if(quarter_idx < quarters.length){
-          pfunc(quarters[quarter_idx],used_data[function_idx]);
+          dict[function_idx]['f'](quarters[quarter_idx],
+                                  dict[function_idx]['d'],
+                                  dict[function_idx]['t'] + date2Qstring(quarters[quarter_idx]),
+                                  dict[function_idx]['id']);
           quarter_idx++;
       }
       else {
         function_idx++;
-        if (function_idx < functions.length){
-            pfunc = functions[function_idx];
-            quarter_idx = 0;
+        if (function_idx < dict.length){
+            quarter_idx = 1;
         }
         else {
             clearInterval(interval);
-            d3.selectAll("circle").remove();
+//            d3.selectAll("circle").remove();
             
+            d3.selectAll("#avg").remove();
             // this is where we start context sensitivy and interactivity
         }
       }
     },timeout);
   }
   
-//  scatter_plot(data);
-  interval_plotting(100);
+  scatter_plot(data);
+//  interval_plotting(200);
 };
 
 var format = d3.time.format("%m/%d/%Y %H:%M")

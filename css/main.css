@@ -18,14 +18,18 @@ text-align: center;
 color: black;
 }
 
-div.years_buttons {
+div.next_button {
 position: fixed;
 top: 5px;
 left: 50px;
+background: orange;
+padding: 4px;
+margin: 7px;
 }
 
-div.years_buttons div {
+div.next_button div {
 background-color: rgb(251, 201, 127);
+background: orange;
 padding: 3px;
 margin: 7px;
 }
@@ -36,7 +40,7 @@ div.tooltip {
   width: 60px;                  
   height: 28px;                 
   padding: 2px;             
-  font: 12px sans-serif;        
+  font: 14px sans-serif;        
   border: 0px;      
   border-radius: 8px;           
   pointer-events: none;
