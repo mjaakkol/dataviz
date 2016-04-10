@@ -13,6 +13,15 @@ The next step was to focus the view to show the overall average through line-cha
 This was a very narrow view so I added the same view so that each credit score category was plotted as own lines. This was the point where narrative storyline ended and the user could explore the lines more details through dynamic animations (effectively tooltips and color changes in lines). Credit scores were coded using colors that was something that I was debating in my mind but chose to do it over gray-scaling or just using tooltips. Let's see what the audience likes on the choices.
 
 # Feedback
+Feedback #1:
+Scatter plot did "open" to the first reviewer and it needed explaining. That was due to the fact that the person wasn't that familiar with the scatter plots but also the context was kind of new. The graph was too dark not really showing the intensity that well. Also the next button didn't "call for" anybody to press it.
+
+The line-graphs were more evident but the tooltip feature was missed altogether at the starts.
+
+Changes made based on the first reviewers feedback:
+- Opacity decreases a bit to bring out the busy periods better
+- The text for the button was changed into more "assertive" version to call people to press it
+- Tooltip text-size and style was changed to make it standout a bit better.
 
 # Resources
 https://github.com/mbostock/d3 http://www.w3schools.com/js/default.asp https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date http://stackoverflow.com/questions/21787200/d3-mapping-4-colors-to-4-numeric-ranges-to-look-a-bit-like-a-very-basic-heatmap http://stackoverflow.com/questions/19595972/d3-js-converting-months-to-quarter http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html http://stackoverflow.com/questions/21490020/remove-line-from-line-graph-in-d3-js http://www.w3schools.com/colors/colors_hex.asp
