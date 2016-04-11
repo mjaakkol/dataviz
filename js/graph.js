@@ -272,10 +272,33 @@ function draw(data) {
       });
       
       var clear_timeout = setTimeout(function() {
+       
           var scatter_next_button = d3.select("body")
                                       .append("div")
                                       .attr("class","next_button")
                                       .text("Click HERE to see how average rates change in a relation to credit scores");
+
+          var legend_title = d3.select("body")
+                                      .append("div")
+                                      .attr("class","legend")
+                                      .style("font-size", "20px")
+                                      .text("Credit score color coding:");
+                                      
+          var credit_scored = d3.select("body")
+                                .data(colors)
+                                .enter()
+                                .append("text")
+                                .attr("id","score_text")
+                                .attr("class","legend")
+                                .attr("y",function(d,i) { return top_point + increment*i;})
+                                .attr("x",width+50)
+                                .style("background", function(d) { return d;})
+                                .style("font-size", "20px")
+                                .style("fill","orange")
+                                .text(function(d){
+                                    var inverted = heatmapColor.invertExtent(d);
+                                    return  Math.ceil(inverted[0]) + "-" + Math.floor(inverted[1]);
+                                });   
                                       
           scatter_next_button.on("click", function(d){
             d3.selectAll("circle").remove();
@@ -283,31 +306,13 @@ function draw(data) {
             interval_plotting(400);
           });
          
-          // Addings the scales
-          var credit_scored = d3.select("body")
-                                .append("div")
-                                .attr("class","score_text"),
-              top_point = 100;
+          var top_point = 100,
+            increment = 20;
 
-          for(var i = 0; i < colors.length; i++){
-            debugger;
-            if (i==0 || i > 2){
-              var inverted = heatmapColor.invertExtent(colors[i]);
-              var scored = credit_scored
-                              .attr("top",top_point)
-                              .style("background",colors[i]);
 
-              if (i < (colors.length-1)){
-                scored
-                  .text(inverted + '-' + heatmapColor.invertExtent(colors[i+1]));
-              }
-              else {
-                scored
-                  .text(inverted + '-' + 999);
-              }
-              top_point += 20;
-            }
-          }
+          
+          
+          
       }, 5000);
   }
   
@@ -326,11 +331,11 @@ function draw(data) {
     var dict = [{ f : update,
                   d : nested_mean,
                   id : "avg",
-                  t : "Average Borrower's rate up to quarter starting at "},
+                  t : "Average borrower's rate up to quarter starting at "},
                 {f : update_credit_scores,
                  d : nested_cscore,
                  id : "score",
-                 t : "Average Borrower's quarterly rate per credit score at "}  ];
+                 t : "Average borrower's quarterly rate per credit score at "}  ];
 
     // Timer for plotting first in time and then in through credit scores
     var interval = setInterval(function(){

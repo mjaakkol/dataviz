@@ -27,22 +27,28 @@ div.next_button {
     margin: 7px;
     border-radius: 8px;
     border: 2px;
+    font-size: 16px
 }
 
-div.score_text {
+.score_text {
     position: fixed;
-    left: 50px;
+    text-align: center;
+    top: 15px;
+    left: 1650px;
     padding: 4px;
     margin: 7px;
+    width: 120px;
+    height: 28px;
     border-radius: 8px;
-    border: 2px;    
+    border: 2px;
+    font-size: 24px;
 }
 
 div.tooltip {   
     position: absolute;           
     text-align: left;           
-    width: 120px;                  
-    height: 28px;                 
+    width: 120px;
+    height: 28px;
     padding: 2px;             
     font: 18px sans-serif;
     font-weight: bold;  
