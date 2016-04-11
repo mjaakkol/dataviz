@@ -1,4 +1,4 @@
-
+// Helper functions
 function key_func(d){
     return d['key'];
 }
@@ -26,6 +26,16 @@ function date2Qstring(date){
     return "Q" + (Math.floor(date.getMonth()/3)+1) + " " + date.getFullYear();
 }
 
+function calculate_credit_score(score){
+    if (score == 0){
+      return "0-299"
+    }
+    else {
+      return score + "-" + (score+19);
+    }
+}
+
+
 function draw_axis(x_axis,y_axis,height,margin){
   d3.select("svg")
     .append("g")
@@ -40,6 +50,7 @@ function draw_axis(x_axis,y_axis,height,margin){
     .call(y_axis);    
 }
 
+// Main operating function
 function draw(data) {
   "use strict";
   var margin = 75,
@@ -71,10 +82,6 @@ function draw(data) {
     return d['BorrowerRate'];
   });
 
-  // Scaling the outliers out of the graph helping with the readability
-  // Still want to keep those values in dataset for the calculations
-  //interest_extent[1] = 0.38;
-  
   var creditscore_extent = d3.extent(data, function(d){
     return d['CreditScoreRangeLower'];
   });
@@ -89,7 +96,9 @@ function draw(data) {
     .range([height, margin])
     .domain(interest_extent);
 
-  // Create color scale
+  // Create color scale. The scale is somewhat non-linear as the first hop is from
+  // 0-299 but after that it goes in intervals of 20. That's why both brown and yellow
+  // will never really get visible in the graphs
   var colors = ["red","brown","yellow","green","turquoise ","blue","purple"];
   var heatmapColor = d3.scale.quantize()
     .domain(creditscore_extent)
@@ -109,7 +118,10 @@ function draw(data) {
 
   /* This makes two layered structure where outer ring is dates in quarters
     so that the date matches the first date of the quarter.
-    The inner-ring is then the lowered credit-score with the average loan rate
+    The inner-ring is then the lowered credit-score with the average loan rate.
+    
+    This is pretty heavy duty way of doing things but will do for now as I've
+    three sets of rolled up data
   */
   var nested = d3.nest()
                 .key(round2quarters)
@@ -144,11 +156,10 @@ function draw(data) {
                 })
                 .entries(data);
 
+  // Making quarters out of date data
   var quarters = get_quarters(nested);
   
-  // Ending plotting scales and making converters
-  // from here we start plotting dots and making graphs
-
+  // Main plotting function
   function update(q,nested_data,title_text,id,highlighted = true, creditscore = 1000){
     var filtered = nested_data.filter(function(d) {
         return (new Date(d['key']) <= q);
@@ -172,11 +183,6 @@ function draw(data) {
                 .x(x_coord)
                 .y(y_coord);
         
-    svg.selectAll("path")
-      .data(filtered,key_func)
-      .exit()
-      .remove();
-      
     var line_stroke = "black",
         stroke_width = 3;
         
@@ -246,7 +252,7 @@ function draw(data) {
       .style("fill", "none");
       
     return lines;
-}
+  }
 
   function scatter_plot(data){
     d3.selectAll("circle")
@@ -260,7 +266,7 @@ function draw(data) {
       .attr("id","scatter")
       .transition()
       .duration(100)
-      .style("fill-opacity",0.7)
+      .style("fill-opacity",0.4)
       .style("fill", function(d){
         return heatmapColor(d['CreditScoreRangeLower']);
       });
@@ -269,23 +275,20 @@ function draw(data) {
           var scatter_next_button = d3.select("body")
                                       .append("div")
                                       .attr("class","next_button")
-                                      .text("Press to see how average rates change in a relation to credit scores");
+                                      .text("Click HERE to see how average rates change in a relation to credit scores");
                                       
           scatter_next_button.on("click", function(d){
             d3.selectAll("circle").remove();
             scatter_next_button.remove();
-            interval_plotting(300);
+            interval_plotting(400);
           });
+/*          
+          // Addings the scales
+          var credit_scored = d3.select("body")
+                                .append("div")
+                                .attr("class","score_text")
+          var gradient_scale */
       }, 5000);
-  }
-  
-  function calculate_credit_score(score){
-    if (score == 0){
-      return "0-299"
-    }
-    else {
-      return score + "-" + (score+19);
-    }
   }
   
   function update_credit_scores(idx,creditscore_data,title_text,id){
@@ -298,6 +301,8 @@ function draw(data) {
     var quarter_idx = 0,
         function_idx = 0;
 
+    // Making list of dictionary objects was the cleanest way of plotting quarterly increments
+    // with different kind of data plotting functions without making too deep nesting
     var dict = [{ f : update,
                   d : nested_mean,
                   id : "avg",
@@ -305,7 +310,7 @@ function draw(data) {
                 {f : update_credit_scores,
                  d : nested_cscore,
                  id : "score",
-                 t : "Average's Borrower's quarterly rate per credit score at "}  ];
+                 t : "Average Borrower's quarterly rate per credit score at "}  ];
 
     // Timer for plotting first in time and then in through credit scores
     var interval = setInterval(function(){
@@ -323,17 +328,13 @@ function draw(data) {
         }
         else {
             clearInterval(interval);
-//            d3.selectAll("circle").remove();
-            
-            d3.selectAll("#avg").remove();
-            // this is where we start context sensitivy and interactivity
+            d3.selectAll("#avg").transition().duration(6000).remove();
         }
       }
     },timeout);
   }
   
   scatter_plot(data);
-//  interval_plotting(200);
 };
 
 var format = d3.time.format("%m/%d/%Y %H:%M")

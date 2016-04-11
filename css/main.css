@@ -20,11 +20,13 @@ color: black;
 
 div.next_button {
 position: fixed;
-top: 5px;
+top: 15px;
 left: 50px;
 background: orange;
 padding: 4px;
 margin: 7px;
+border-radius: 8px;
+border: 2px;
 }
 
 div.next_button div {
@@ -36,12 +38,13 @@ margin: 7px;
 
 div.tooltip {   
   position: absolute;           
-  text-align: center;           
-  width: 60px;                  
+  text-align: left;           
+  width: 120px;                  
   height: 28px;                 
   padding: 2px;             
-  font: 14px sans-serif;        
+  font: 18px sans-serif;
+  font-weight: bold;  
   border: 0px;      
-  border-radius: 8px;           
+  border-radius: 8px;
   pointer-events: none;
 }
