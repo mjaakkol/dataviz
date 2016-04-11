@@ -282,12 +282,32 @@ function draw(data) {
             scatter_next_button.remove();
             interval_plotting(400);
           });
-/*          
+         
           // Addings the scales
           var credit_scored = d3.select("body")
                                 .append("div")
-                                .attr("class","score_text")
-          var gradient_scale */
+                                .attr("class","score_text"),
+              top_point = 100;
+
+          for(var i = 0; i < colors.length; i++){
+            debugger;
+            if (i==0 || i > 2){
+              var inverted = heatmapColor.invertExtent(colors[i]);
+              var scored = credit_scored
+                              .attr("top",top_point)
+                              .style("background",colors[i]);
+
+              if (i < (colors.length-1)){
+                scored
+                  .text(inverted + '-' + heatmapColor.invertExtent(colors[i+1]));
+              }
+              else {
+                scored
+                  .text(inverted + '-' + 999);
+              }
+              top_point += 20;
+            }
+          }
       }, 5000);
   }
   

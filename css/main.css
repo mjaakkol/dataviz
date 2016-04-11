@@ -6,45 +6,47 @@
 }
 
 circle {
-fill: orange;
-stroke: black;
-stroke-width: 0.7;
-opacity: 0.7;
-r: 4;
+    fill: orange;
+    stroke: black;
+    stroke-width: 0.7;
+    opacity: 0.7;
+    r: 4;
 }
 
 h2 {
-text-align: center;
-color: black;
+    text-align: center;
+    color: black;
 }
 
 div.next_button {
-position: fixed;
-top: 15px;
-left: 50px;
-background: orange;
-padding: 4px;
-margin: 7px;
-border-radius: 8px;
-border: 2px;
+    position: fixed;
+    top: 15px;
+    left: 50px;
+    background: orange;
+    padding: 4px;
+    margin: 7px;
+    border-radius: 8px;
+    border: 2px;
 }
 
-div.next_button div {
-background-color: rgb(251, 201, 127);
-background: orange;
-padding: 3px;
-margin: 7px;
+div.score_text {
+    position: fixed;
+    left: 50px;
+    padding: 4px;
+    margin: 7px;
+    border-radius: 8px;
+    border: 2px;    
 }
 
 div.tooltip {   
-  position: absolute;           
-  text-align: left;           
-  width: 120px;                  
-  height: 28px;                 
-  padding: 2px;             
-  font: 18px sans-serif;
-  font-weight: bold;  
-  border: 0px;      
-  border-radius: 8px;
-  pointer-events: none;
+    position: absolute;           
+    text-align: left;           
+    width: 120px;                  
+    height: 28px;                 
+    padding: 2px;             
+    font: 18px sans-serif;
+    font-weight: bold;  
+    border: 0px;      
+    border-radius: 8px;
+    pointer-events: none;
 }
