@@ -54,8 +54,8 @@ function draw_axis(x_axis,y_axis,height,margin){
 function draw(data) {
   "use strict";
   var margin = 75,
-      width = 1600 - margin,
-      height = 1000 - margin;
+      width = 1300 - margin,
+      height = 800 - margin;
 
   d3.select("body")
     .append("h2")
@@ -99,7 +99,7 @@ function draw(data) {
   // Create color scale. The scale is somewhat non-linear as the first hop is from
   // 0-299 but after that it goes in intervals of 20. That's why both brown and yellow
   // will never really get visible in the graphs
-  var colors = ["red","brown","yellow","green","turquoise ","blue","purple"];
+  var colors = ["red","orange","yellow","green","turquoise ","blue","purple"];
   var heatmapColor = d3.scale.quantize()
     .domain(creditscore_extent)
     .range(colors);
@@ -158,7 +158,7 @@ function draw(data) {
 
   // Making quarters out of date data
   var quarters = get_quarters(nested);
-  
+
   // Main plotting function
   function update(q,nested_data,title_text,id,highlighted = true, creditscore = 1000){
     var filtered = nested_data.filter(function(d) {
@@ -267,25 +267,32 @@ function draw(data) {
       .transition()
       .duration(100)
       .style("fill-opacity",0.4)
+      .style("stroke-width", 0)
       .style("fill", function(d){
         return heatmapColor(d['CreditScoreRangeLower']);
       });
       
       var clear_timeout = setTimeout(function() {
-       
+          var top_point = 100,
+            increment = 15;
+            
           var scatter_next_button = d3.select("body")
                                       .append("div")
                                       .attr("class","next_button")
+                                      .style("cursor","pointer")
                                       .text("Click HERE to see how average rates change in a relation to credit scores");
 
           var legend_title = d3.select("body")
                                       .append("div")
                                       .attr("class","legend")
-                                      .style("font-size", "20px")
+                                      .style("font-size", "24px")
                                       .text("Credit score color coding:");
+          var trimmed_colors = colors.slice();
+         
+          trimmed_colors.splice(1,1); 
                                       
-          var credit_scored = d3.select("body")
-                                .data(colors)
+          var credit_scored = d3.selectAll("body.legend")
+                                .data(trimmed_colors)
                                 .enter()
                                 .append("text")
                                 .attr("id","score_text")
@@ -293,11 +300,20 @@ function draw(data) {
                                 .attr("y",function(d,i) { return top_point + increment*i;})
                                 .attr("x",width+50)
                                 .style("background", function(d) { return d;})
-                                .style("font-size", "20px")
-                                .style("fill","orange")
+                                .style("font-size", "24px")
+                                .style("color","orange")
+                                .style("padding","4px")
                                 .text(function(d){
                                     var inverted = heatmapColor.invertExtent(d);
-                                    return  Math.ceil(inverted[0]) + "-" + Math.floor(inverted[1]);
+                                    debugger;
+                                    if (inverted[0] == 0){
+                                        return "  0-299";
+                                    } else if (inverted[0] < 300){
+                                        return "300-"+Math.floor(inverted[1]);
+                                    }
+                                    else {
+                                        return  Math.ceil(inverted[0]) + "-" + Math.floor(inverted[1]);
+                                    }
                                 });   
                                       
           scatter_next_button.on("click", function(d){
@@ -306,13 +322,8 @@ function draw(data) {
             interval_plotting(400);
           });
          
-          var top_point = 100,
-            increment = 20;
 
 
-          
-          
-          
       }, 5000);
   }
   
