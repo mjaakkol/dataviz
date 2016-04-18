@@ -1,14 +1,10 @@
 # Summary
-This project is explaning what kind of interest rate people were paying on their loans and how loan intensity (# of loans in the given time) changed over the given time period. The project takes more detailed look on average loan rate and how averages over the credit scores relate to each other.
+This project is explaning what kind of interest rate people were paying on their loans over time. The project takes more detailed look on average loan rate and how averages over the credit scores relate to each other. One of the key takeaways is that credit score is meaningful only to certain values and other information (not explored here) besides credit-scored becomes more important.
 
-As a side product, the graph also shows how 2008 credit crises changes the landshape in loans.
+As a side product, the graph also shows how 2008 credit crises changes the landshape in loans. Over the next three years the poorer credit-score people loan interest rates had significant increase while the available money were moved towards more "safe bets". 
 
 # Design
-I chose to provide overall 'drinking from firehose' view as the starting point and then narrowing the scope to summarize the firehose view and then expanding it to show more clearly how credit scores correlate with the loanrate.
-
-The first view used scatter plot to give rough view on how load rates correlated with the credit scores where color was used the indicator of the credit scores. Scatter plot provided also clear view how the load intensity changed over the time.
-
-The next step was to focus the view to show the overall average through line-charts as scatter plot wasn't necessarily the best tool to reveal how the overall loan rates changed over the time. Here the approach was to provide quarterly view to give enough critical mass to calculate "good" average. Line-graph also showed the change between quarters making it clearer how much the loan rate changed.
+Storyline changed a bit due to Udacity review. Scatter plot was removed and instead more meat and improvements were added to the line-chart. The story starts with showing overall borrower's loan rate changes over time. Here the approach was to provide quarterly view to give enough critical mass to calculate meaningful average. Line-graph also showed the change between quarters making it clearer how much the loan rate changed.
 
 This was a very narrow view so I added the same view so that each credit score category was plotted as own lines. This was the point where narrative storyline ended and the user could explore the lines more details through dynamic animations (effectively tooltips and color changes in lines). Credit scores were coded using colors that was something that I was debating in my mind but chose to do it over gray-scaling or just using tooltips. Let's see what the audience likes on the choices.
 
@@ -34,7 +30,7 @@ When moving the mouse pointer over the click-button, it shouldn't make the curso
 
 The second screen looked very good but even there it would be nice to get the quarter displayed on the place were mouse pointer is placed. 
 
-Changes to be made due  the reviewer's feedback:
+Changes to be made due the reviewer's feedback:
 The zoom idea is good but that's too much work for the given project. Not planning to implement.
 
 The second suggestion is potentially something I could consider implementing. There is some work but not a crazy amount.
@@ -48,11 +44,11 @@ Some explanation of the context would have been nice (doesn't necessarily pop up
 
 Axis could have been labeled and fonts should have been bigger for both the title as well as for scale and axis. The design looks a bit old style due to selected fonts. The fonts in today's web-pages are bigger and softer.
 
-Reviewer clicked the tooltip line and expected some action but couldn't specify what. It wasn't necessarily clear if something should have been added there. 
+Reviewer clicked the tooltip line and expected some action but couldn't specify what. It wasn't necessarily clear if something should have been added there.
 
 All and all the reviewer loved the last picture.
 
-Changes to be made due  the reviewer's feedback:
+Changes to be made due the reviewer's feedback:
 Font sizes will be increased but not necessarily the style in the scope of this project. I won't necessarily be adding new labels for axis as wanting to keep the minimalist design and there is % signs and it is very clear that x axis is about the time so if the reader just slows down a bit he/she can see what the axis are about (especially as title says it as well). There is some value of keeping the picture simple and this was the only reviewer bringing the topic up.
 
 # Resources
