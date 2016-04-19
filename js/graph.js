@@ -364,9 +364,10 @@ function draw(data) {
 
 var format = d3.time.format("%m/%d/%Y %H:%M")
 
+debugger;
+
 d3.csv("data/prosperLoanData.csv", function(d) {
   d['BorrowerRate'] = +d['BorrowerRate'];
-  d['StatedMonthlyIncome'] = +d['StatedMonthlyIncome'];
   d['CreditScoreRangeLower'] = +d['CreditScoreRangeLower'];
   d['LoanOriginationDate'] = format.parse(d['LoanOriginationDate']);
   return d;      
